@@ -1,4 +1,4 @@
-defmodule Helm.Install do
+defmodule Helm.Chart do
   @moduledoc """
   --atomic                                     if set, the installation process deletes the installation on failure. The --wait flag will be set automatically if --atomic is used
   --ca-file string                             verify certificates of HTTPS-enabled servers using this CA bundle
@@ -37,8 +37,8 @@ defmodule Helm.Install do
 
   """
 
-  import Helm.Pkg.Cmd
-  @enforce_keys [:name, :chart]
+  import Helm.Core.Cmd
+
   defstruct [
     :values,
     :set_file,
@@ -48,6 +48,7 @@ defmodule Helm.Install do
     :description,
     :repo,
     :name,
+    :wait,
     :key_file,
     :keyring,
     :name_template,
@@ -72,11 +73,12 @@ defmodule Helm.Install do
   ]
 
 
-  @flags [
+  @install_flags [
     {:name, :required},
     {:chart, :required},
-    {:repo, :no_escape},
+    {:repo, :string},
     {:description, :string},
+    {:timeout, :string},
     {:username, :string},
     {:password, :string},
     :atomic,
@@ -94,9 +96,8 @@ defmodule Helm.Install do
     :post_renderer_args,
     :render_subchart_notes,
     :replace,
-    :timeout,
-    :values,
 
+    :values,
     :verify,
     :version,
     :wait,
@@ -104,11 +105,32 @@ defmodule Helm.Install do
 
   ]
 
-  @command "install"
 
-  def run(%__MODULE__{} = options) do
+  @uninstall_flags [
+    {:name, :required},
+    {:description, :string},
+    {:timeout, :string},
+    :dry_run,
+    :help,
+    :keep_history,
+    :no_hooks,
 
-    build_command([@command], options, @flags)
+
+
+  ]
+  def create_chart(%__MODULE__{} = options) do
+
+    build_command(["install"], options, @install_flags)
+  end
+
+
+  def delete_chart(%__MODULE__{} = options) do
+    build_command(["uninstall"], options, @uninstall_flags)
+  end
+
+
+  def list_releases() do
+
   end
 
 
